@@ -1,0 +1,128 @@
+set nocompatible
+filetype off
+
+call plug#begin('~/.vim/plugged')
+Plug 'Yggdroot/indentLine'
+Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
+Plug 'Valloric/YouCompleteMe'
+Plug 'ludovicchabant/vim-gutentags'
+Plug 'octol/vim-cpp-enhanced-highlight'
+Plug 'tpope/vim-projectionist'
+Plug 'rhysd/vim-clang-format', { 'on': 'ClangFormatAutoEnable'}
+Plug 'morhetz/gruvbox'
+Plug 'mhinz/vim-signify'
+
+"Plug 'altercation/vim-colors-solarized'
+"Plug 'Lokaltog/vim-easymotion'
+"Plug 'SirVer/ultisnips'
+"Plug 'vim-scripts/a.vim'
+"Plug 'Shougo/echodoc.vim'
+"Plug 'dense-analysis/ale'
+
+" 表示对某类型文件才加载
+" Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
+" 分支
+" Plug 'rdnetto/YCM-Generator', { 'branch': 'stable' }
+
+call plug#end()
+
+filetype plugin indent on
+
+set encoding=utf-8
+
+set tags=./.tags;,.tags
+
+syntax enable
+set t_Co=256
+set background=dark
+"set background=light
+"colorscheme herald
+colorscheme gruvbox
+
+let g:gutentags_project_root = ['.root', '.svn', '.git', '.hg', '.project']
+"let g:gutentags_project_root = ['.root']
+let g:gutentags_ctags_tagfile = '.tags'
+
+let s:vim_tags = expand('~/.cache/tags')
+let g:gutentags_cache_dir = s:vim_tags
+
+"ctags -R --fields=+anfiKSzl --extras=+q --c++-kinds=+pxz --c-kinds=+pxz -f .tags --output-format=e-ctags .
+let g:gutentags_ctags_extra_args = ['--fields=+anfiKSzl', '--extra=+q', '--c++-kinds=+pxz', '--c-kinds=+pxz', '--output-format=e-ctags']
+
+let mapleader = ","
+map <silent> <leader>ss :source ~/.vimrc<cr>
+map <silent> <leader>ee :e ~/.vimrc<cr>
+autocmd! bufwritepost .vimrc source ~/.vimrc
+
+set cursorline
+
+" 两个字符即开启提示
+let g:ycm_min_num_identifier_candidate_chars = 3
+let g:ycm_error_symbol = '>>'
+let g:ycm_warning_symbol = '>*'
+" 使用 ycm_extra_conf.py 前不要询问
+let g:ycm_confirm_extra_conf = 0
+let g:ycm_global_ycm_extra_conf = '~/.vim/plugged/YouCompleteMe/third_party/ycmd/examples/.ycm_extra_conf.py'
+" let g:ycm_always_populate_location_list = 1
+let g:ycm_key_invoke_completion = '<c-z>'
+" let g:ycm_server_python_interpreter="/usr/local/bin/python3"
+" let g:ycm_python_binary_path = '/usr/local/bin/'
+let g:ycm_collect_identifiers_from_tag_files = 1
+let g:ycm_collect_identifiers_from_comments_and_strings = 1
+let g:ycm_semantic_triggers =  {
+			\ 'c,cpp,python,java,go,erlang,perl': ['re!\w{2}'],
+			\ 'cs,lua,javascript': ['re!\w{2}'],
+			\ }
+let g:ycm_filetype_whitelist = {
+			\ "c":1,
+			\ "cpp":1,
+            \ "python":1,
+            \ "proto":1,
+			\ "sh":1,
+            \ "go":1,
+            \ "ruby":1,
+            \ "blade":1,
+            \ "lua":1
+			\ }
+
+let g:cpp_class_scope_highlight = 1
+let g:cpp_member_variable_highlight = 1
+let g:cpp_class_decl_highlight = 1
+"let g:cpp_experimental_simple_template_highlight = 1
+"let g:cpp_experimental_template_highlight = 1
+"let g:cpp_no_function_highlight = 1
+
+if filereadable("/Users/zhangrz/.svimrc")
+  source /Users/zhangrz/.svimrc
+endif
+
+" 检测 ~/.cache/tags 不存在就新建
+if !isdirectory(s:vim_tags)
+   silent! call mkdir(s:vim_tags, 'p')
+endif
+
+" 去除行尾空格
+function RemoveTrailingWhitespace()
+  if &ft != "diff"
+    let b:curcol = col(".")
+    let b:curline = line(".")
+    silent! %s/\s\+$//
+    silent! %s/\(\s*\n\)\+\%$//
+    call cursor(b:curline, b:curcol)
+  endif
+endfunction
+
+autocmd BufWritePre * call RemoveTrailingWhitespace()
+
+" 格式检查
+"autocmd FileType c,cpp,proto,javascript AutoFormatBuffer clang-format
+"autocmd FileType c,cpp,proto,javascript ClangFormatAutoEnable
+autocmd FileType json IndentLinesDisable
+
+augroup filetype
+    autocmd! BufRead,BufNewFile BUILD set filetype=blade
+augroup end
+
+if has('python3')
+  silent! python3 1
+endif
